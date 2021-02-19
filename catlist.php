@@ -25,7 +25,7 @@ $userID = getActiveUserID($db);
 
 <div class=" container text-center mt-3 mb-3">
     <p class="h2">Your feedback categories</p>
-    <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#addCategoryModal">Add</button>
+    <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#addCategoryModal">New Category</button>
 </div>
 
 <div class="container d-flex justify-content-around flex-wrap" id="catCardContainer"></div>
@@ -71,6 +71,7 @@ $userID = getActiveUserID($db);
     </div>
 </div>
 
+<!--TODO Reduce to one modal-->
 <div class="modal" id="editCategoryModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">

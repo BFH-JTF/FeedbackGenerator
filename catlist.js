@@ -10,7 +10,7 @@ function fillEditModal(e){
     let cardTitleNode = $(e.parentNode.parentNode.parentNode).find(".card-title")[0];
     let cardTextNode = $(e.parentNode.parentNode.parentNode).find(".card-text")[0];
     let cardMain = cardTextNode.parentNode.parentNode;
-    document.getElementById("editCategoryName").value = cardTitleNode.innerText.split(" ")[0];
+    document.getElementById("editCategoryName").value = cardTitleNode.innerText;
     document.getElementById("editCategoryColor").value = rgb2hex(cardTitleNode.style.backgroundColor);
     document.getElementById("editCategoryDesc").innerText = cardTextNode.innerText;
     document.getElementById("editID").value = cardMain.dataset.id;
@@ -62,6 +62,7 @@ function saveCategory(){
 }
 
 function addCategoryTile(data) {
+    // TODO Remove proxy call if no further functionality is added
     createCategoryTile(data["categoryID"], data["name"], data["color"], data["desc"]);
 }
 
@@ -142,11 +143,12 @@ function addCategoryCallback(data, status){
 }
 
 function saveCategoryCallback(data, status){
-    // FIXME Category tile not updated
     let d = JSON.parse(data);
-    console.log(d.id);
-    let element = document.querySelector('[id="' + d.id +'"]');
-    console.log(element);
+    let element = document.querySelector('[data-id="' + d.id +'"]');
+    let cardTitle = element.getElementsByClassName("card-title")[0];
+    cardTitle.innerText = d.name;
+    cardTitle.style.backgroundColor = d.color;
+    element.getElementsByClassName("card-text")[0].innerText = d.desc;
 }
 
 function getCategoriesCallback(data, status){

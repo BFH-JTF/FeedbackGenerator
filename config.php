@@ -1,6 +1,7 @@
 <?php
-// fej1@bfh.ch
+// fej1@bfh.ch / hdd2@bfh.ch
 // 31893d2f5069da41348c3586c76806c436ad1a6ccde8d5f69db95508b03f591a
+// 3c9e486b750ea9de3da1c02d78e0359a6dc4bad867c635b9f0e6ab4891062c6d
 
 function connectDB (): mysqli
 {

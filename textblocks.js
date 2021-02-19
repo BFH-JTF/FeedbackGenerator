@@ -3,24 +3,16 @@ let currentPerformance = 5;
 let performanceFilterActive = true;
 
 function pageLoaded(){
-    // Load data
-    let categoryArray = [
-        {id: 0, name: "Language"},
-        {id: 1, name: "Management Summary"}
-    ];
-
-    for (let i=0; i<categoryArray.length ; i++){
-        currentCategories.push(categoryArray[i].id);
-    }
-
-    updateCards();
+    APIsend("getTextBlocks", null);
 }
 
 function categoryButtonClick(element){
     if (element.getAttribute("data-status") === "enabled"){
         // Disable category nodes
         let index = currentCategories.indexOf(Number(element.getAttribute("data-category")));
-        currentCategories.splice(index, 1);
+        if (index > -1) {
+            currentCategories.splice(index, 1);
+        }
         element.setAttribute("data-status", "disabled");
         element.setAttribute("class", "btn btn-outline-secondary");
         element.setAttribute("style", "");
@@ -40,12 +32,13 @@ function updateCards(){
     for(let card of cards){
         let smallNode = $(card).find("small")[0];
         smallNode.innerText = smallNode.getAttribute("data-performance");
-        if(currentCategories.includes(Number(smallNode.getAttribute("data-category"))) &&
+        let test = Number(smallNode.getAttribute("data-category"));
+        if(currentCategories.includes(test) &&
             (performanceFilterActive === false || currentPerformance === Number(smallNode.getAttribute("data-performance")))){
-            smallNode.parentNode.parentNode.parentNode.hidden = false;
+            card.hidden = false;
         }
         else {
-            smallNode.parentNode.parentNode.parentNode.hidden = true;
+            card.hidden = true;
         }
     }
 }
@@ -65,8 +58,14 @@ function filterSwitch(){
     updateCards();
 }
 
-function addBlock(title, text, performance, categoryId){
-
+function addBlock(){
+    let data = {
+        title: document.getElementById("TextBlockModalTitle").value,
+        performance: document.getElementById("TextBlockModalPerformanceSlider").value,
+        category: document.getElementById("TextBlockModalCategorySelect").value,
+        textBlock: document.getElementById("TextBlockModalText").value,
+    }
+    APIsend("addTextBlock", JSON.stringify(data));
 }
 
 function removeBlock(e){
@@ -75,17 +74,96 @@ function removeBlock(e){
     }
 }
 
-function fillEditModal(e){
-    let cardTitleNode = $(e.parentNode.parentNode.parentNode).find(".card-title")[0];
-    let cardTextNode = $(e.parentNode.parentNode.parentNode).find(".card-text")[0];
-    let smallNode = $(e.parentNode.parentNode.parentNode).find("small")[0];
-    // Set title
-    document.getElementById("editTextBlockTitle").value = cardTitleNode.innerText;
-    // Set performance
-    document.getElementById("modalPerformanceSlider").value = Number(smallNode.innerText);
-    modalPerformanceChange(document.getElementById("modalPerformanceSlider"));
-    // Set text
-    document.getElementById("editTextBlockText").innerText = cardTextNode.innerText;
-    // Set category
-    $('#editCategorySelect').val(smallNode.getAttribute("data-category"));
+function saveBlock(){
+    let data = {
+        textBlock: document.getElementById("TextBlockModalText").value,
+        title: document.getElementById("TextBlockModalTitle").value,
+        categoryID: document.getElementById("TextBlockModalCategorySelect").value,
+        performance: document.getElementById("TextBlockModalPerformanceSlider").value,
+        textBlockID: document.getElementById("TextBlockModalID").value
+    }
+    APIsend("saveTextBlock", JSON.stringify(data));
+}
+
+function fillTextBlockModal(e){
+    if (e === null){
+        document.getElementById("TextBlockModalHeading").innerText = "New Textblock"
+        document.getElementById("TextBlockModalNewButton").innerText = "Create Textblock"
+        document.getElementById("TextBlockModalTitle").value = "";
+        document.getElementById("TextBlockModalPerformanceSlider").value = 5;
+        document.getElementById("TextBlockModalText").innerText = "";
+        document.getElementById("TextBlockModalNewButton").setAttribute("onclick", "addBlock()");
+    }
+    else {
+        document.getElementById("TextBlockModalHeading").innerText = "Edit Textblock";
+        document.getElementById("TextBlockModalNewButton").innerText = "Save Textblock";
+        document.getElementById("TextBlockModalNewButton").setAttribute("onclick", "saveBlock()");
+
+        let cardTitleNode = $(e.parentNode.parentNode.parentNode).find(".card-title")[0];
+        let cardTextNode = $(e.parentNode.parentNode.parentNode).find(".card-text")[0];
+        let smallNode = $(e.parentNode.parentNode.parentNode).find("small")[0];
+        document.getElementById("TextBlockModalTitle").value = cardTitleNode.innerText;
+        document.getElementById("TextBlockModalPerformanceSlider").value = Number(smallNode.innerText);
+        modalPerformanceChange(document.getElementById("TextBlockModalPerformanceSlider"));
+        document.getElementById("TextBlockModalText").innerText = cardTextNode.innerText;
+        $('#editCategorySelect').val(smallNode.getAttribute("data-category"));
+        $("#TextBlockModalID").val(smallNode.getAttribute("data-id"))
+    }
+}
+
+function addTextBlockTile(data) {
+    let parentElement = document.getElementById("cardContainer");
+    let cardMain = document.createElement("div",);
+    let id = data.blockID;
+    cardMain.setAttribute("class", "card mt-3 mb-3");
+    cardMain.setAttribute("style", "width: 20em;");
+    cardMain.setAttribute("data-type", "categoryCard");
+    cardMain.setAttribute("data-id", data.blockID);
+    parentElement.appendChild(cardMain);
+    cardMain.innerHTML="<div class=\"card-body\">\n" +
+        "<h5 class=\"card-title\">" + data.title + "</h5>\n" +
+        "<p class=\"card-text\">" + data.textblock + "</p>\n" +
+        "<div class=\"card-footer bg-transparent border-primary\">\n" +
+        "<div class=\"container-fluid d-flex justify-content-between\">\n" +
+        "<a href=\"#\" class=\"btn btn-outline-primary\" data-toggle=\"modal\" data-target=\"#TextBlockModal\" onclick=\"fillTextBlockModal(this)\">Open</a>\n" +
+        "<a href=\"#\" class=\"btn btn-outline-danger\" onclick=\"removeBlock(this)\">Remove</a>\n" +
+        "</div>\n" +
+        "</div>\n" +
+        "<div class=\"container\">\n" +
+        "<small class=\"p-2\" style=\"background-color: " + data.color + "\" data-category=\"" + data.categoryID + "\" data-performance=\"" + data.performance + "\" data-id=\"" + id + "\">" + data.blockID + "</small>\n" +
+        "</div>\n" +
+        "</div>";
+    updateCards();
+}
+
+function getTextBlocksCallback(data, status){
+    let d = JSON.parse(data);
+    for (let c of d){
+        addTextBlockTile(c);
+        currentCategories.push(Number(c.categoryID));
+    }
+    currentCategories = currentCategories.filter((e, i) => currentCategories.indexOf(e) === i);
+    updateCards();
+}
+
+function addTextBlockCallback(data, status){
+    if (data === -1){
+        alert("Could not save text block in database");
+    }
+    else{
+        addTextBlockTile(JSON.parse(data));
+    }
+}
+
+function saveTextBlockCallback(data, status){
+    let d = JSON.parse(data);
+    let element = document.querySelector('[data-id="' + d.id +'"]');
+    let cardTitle = element.getElementsByClassName("card-title")[0];
+    cardTitle.innerText = d.name;
+    cardTitle.style.backgroundColor = d.color;
+    element.getElementsByClassName("card-text")[0].innerText = d.desc;
+}
+
+function checkModalAddData(){
+    document.getElementById("TextBlockModalNewButton").disabled = document.getElementById("TextBlockModalTitle").value.length <= 0;
 }

@@ -15,6 +15,19 @@ function APIsend(action, data){
 
         case "removeCategory":
             callbackFunction = null;
+            break
+
+        case "addTextBlock":
+            callbackFunction = addTextBlockCallback;
+            break;
+
+        case "getTextBlocks":
+            callbackFunction = getTextBlocksCallback;
+            break;
+
+        case "saveTextBlock":
+            callbackFunction = getTextBlocksCallback;
+            break;
     }
     $.post("api.php", {action: action, data: data}, callbackFunction);
 }
