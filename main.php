@@ -6,6 +6,14 @@ if (!userAuthenticated()){
 }
 $db = connectDB();
 $userID = getActiveUserID($db);
+$result = $db->query("SELECT categoryID, name, color from categories WHERE owner='".$userID."' ORDER BY name");
+$r = $result->fetch_all(MYSQLI_ASSOC);
+$buttonString = "";
+foreach ($r as $cat){
+    $buttonString .= '<button class="btn btn-outline-light m-1 border border-dark" style="background-color: '.$cat["color"].'" data-color="'.$cat["color"].'" data-status="enabled" data-category="'.$cat["categoryID"].'" onclick="categoryButtonClick(this)">'.$cat["name"].'</button>';
+}
+
+$submissionID = $_GET["sid"] // FIXME How is submission ID handed over?
 ?>
 <html lang="en">
 <head>
@@ -43,7 +51,7 @@ $userID = getActiveUserID($db);
     <div class="col-sm-2">
         <h5 class="text-center">Submissions</h5>
         <div class="list-group">
-            <a id="sub1" class="list-group-item list-group-item-action"><i class="far fa-circle mr-2" style="color: Tomato;"></i>Troy Partridge</a>
+            <a id="sub1" class="list-group-item list-group-item-action"><i class="far fa-circle mr-2" style="color: Tomato;"></i>Troy Partridge<i class="fas fa-envelope-open-text ml-2"></i></a>
             <a id="sub2" class="list-group-item list-group-item-action bg-light"><i class="far fa-check-circle mr-2" style="color: Forestgreen;"></i>Dane Villalobos</a>
             <a href="#" class="list-group-item list-group-item-action">Margot Bean</a>
             <a href="#" class="list-group-item list-group-item-action">Chanice Edge</a>
@@ -71,26 +79,18 @@ $userID = getActiveUserID($db);
     <div class="col-sm-10">
         <div class="container-fluid text-center mt-3 mb-3">
             <p class="h2 d-block">Feedback Editor</p>
-            <button type="button" class="btn btn-success btn-sm m-2">Next Submission</button>
             <p>Filter by Category</p>
-            <div id="categoryButtonContainer" class="container-fluid text-center mt-1 mb-3 d-flex justify-content-center">
-                <button class="btn btn-outline-light m-1" style="background-color: #66cdaa" data-color="#66cdaa" data-status="enabled" data-category="0" onclick="categoryFilterButtonClick(this)">
-                    Language
-                </button>
-                <button class="btn btn-outline-light m-1" style="background-color: #6F8CFF" data-color="#6F8CFF" data-status="enabled" data-category="1" onclick="categoryFilterButtonClick(this)">
-                    Management Summary
-                </button>
+            <div class="container-fluid text-center mt-3 mb-3 d-flex justify-content-center">
+                <?php echo $buttonString;?>
             </div>
-            <div class="container d-flex form-check form-switch">
-                <input id="tickFilter" class="form-check-input" type="checkbox" onchange="filterSwitch()" checked>&nbsp;
-                <label for="tickFilter"> Filter by Performance</label> (<span id="performanceValue">5</span>)
+            <p><input id="tickFilter" type="checkbox" onchange="filterSwitch()" checked> <label for="tickFilter">Filter by Performance</label> (<span id="performanceValue">3</span>)</p>
+            <div class="slidecontainer">
+                <input type="range" min="1" max="4" value="3" class="slider" id="performanceSlider" oninput="performanceChange(this)">
             </div>
-            <input style="width: 50%" type="range" min="1" max="10" value="5" class="slider" id="performanceSlider" oninput="performanceChange(this)">
         </div>
         <hr>
         <p class="text-lead text-center">Click on <span style="color: Tomato;"><i class="fas fa-trash-alt"></i></span> to remove text block from feedback text</p>
         <div class="container-fluid mt-5">
-<!--            TODO HTML5 Sortable JQuery https://jsfiddle.net/boeu4zdg/3/-->
             <div id="activeFeedbackItems" class="list-group">
                 <ul id="sortable" class="sortable grid w-100">
                     <li draggable="true" data-category="1" data-performance="5"><span style="color: Tomato;" onclick="activeFeedbackClick(this)"><i class="fas fa-trash-alt mr-2"></i></span><br>More Illustration recommended</li>

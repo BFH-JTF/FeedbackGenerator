@@ -70,6 +70,8 @@ function addBlock(){
 
 function removeBlock(e){
     if(confirm("Are you sure you would like to remove this text block?")){
+        let id = e.parentNode.parentNode.parentNode.parentNode.dataset.id;
+        APIsend("removeTextBlock", id);
         e.parentNode.parentNode.parentNode.parentNode.remove();
     }
 }
@@ -98,6 +100,7 @@ function fillTextBlockModal(e){
         document.getElementById("TextBlockModalHeading").innerText = "Edit Textblock";
         document.getElementById("TextBlockModalNewButton").innerText = "Save Textblock";
         document.getElementById("TextBlockModalNewButton").setAttribute("onclick", "saveBlock()");
+        document.getElementById("TextBlockModalNewButton").disabled = false;
 
         let cardTitleNode = $(e.parentNode.parentNode.parentNode).find(".card-title")[0];
         let cardTextNode = $(e.parentNode.parentNode.parentNode).find(".card-text")[0];
@@ -106,7 +109,7 @@ function fillTextBlockModal(e){
         document.getElementById("TextBlockModalPerformanceSlider").value = Number(smallNode.innerText);
         modalPerformanceChange(document.getElementById("TextBlockModalPerformanceSlider"));
         document.getElementById("TextBlockModalText").innerText = cardTextNode.innerText;
-        $('#editCategorySelect').val(smallNode.getAttribute("data-category"));
+        $('#TextBlockModalCategorySelect').val(smallNode.getAttribute("data-category"));
         $("#TextBlockModalID").val(smallNode.getAttribute("data-id"))
     }
 }
@@ -157,11 +160,15 @@ function addTextBlockCallback(data, status){
 
 function saveTextBlockCallback(data, status){
     let d = JSON.parse(data);
-    let element = document.querySelector('[data-id="' + d.id +'"]');
+    console.log(d);
+    let element = document.querySelector('[data-id="' + d.textBlockID +'"]');
+    console.log(element);
     let cardTitle = element.getElementsByClassName("card-title")[0];
-    cardTitle.innerText = d.name;
-    cardTitle.style.backgroundColor = d.color;
-    element.getElementsByClassName("card-text")[0].innerText = d.desc;
+    cardTitle.innerText = d.title;
+    element.getElementsByClassName("card-text")[0].innerText = d.textBlock;
+    element.getElementsByTagName("small")[0].style.backgroundColor = d.color;
+    element.getElementsByTagName("small")[0].innerText = d.performance;
+
 }
 
 function checkModalAddData(){

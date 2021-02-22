@@ -91,3 +91,25 @@ function activeFeedbackClick(e){
         }
     }
 }
+
+function getAssignmentData(aID, webserviceToken){
+    const settings = {
+        "async": true,
+        "crossDomain": true,
+        "url": "https://z3learning.com/moodle/webservice/restful/server.php/local_feedback_list_submissions",
+        "method": "POST",
+        "headers": {
+            "Content-Type": "application/json",
+            "Authorization": webserviceToken,
+            "HTTP_ACCEPT": "application/json",
+            "HTTP_CONTENT_TYPE": "application/json",
+            "Accept": "application/json"
+        },
+        "processData": false,
+        "data": "{\"request\": {\"assignid\": " + aID + "}}"
+    };
+
+    $.ajax(settings).done(function (response) {
+        console.log(response);
+    });
+}

@@ -1,7 +1,6 @@
 function removeCategory(e){
     if(confirm("Are you sure you would like to remove this category?")){
-        let id = e.parentNode.parentNode.parentNode.parentNode.dataset.id;
-        APIsend("removeCategory", id);
+        APIsend("removeCategory", e.parentNode.parentNode.parentNode.parentNode.dataset.id);
         e.parentNode.parentNode.parentNode.parentNode.remove();
     }
 }

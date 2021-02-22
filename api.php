@@ -56,8 +56,15 @@ if (userAuthenticated() && isset($_POST["action"]) && isset($_POST["data"])){
             break;
 
         case "saveTextBlock":
-            $test = "UPDATE textblocks SET categoryID='".$db->real_escape_string($data->categoryID)."', textblock='".$db->real_escape_string($data->textblock)."', title='".$db->real_escape_string($data->performance)."', title='".$db->real_escape_string($data->title)."' WHERE blockID=".$db->real_escape_string($data->blockTextID);
-            $db->query("UPDATE textblocks SET categoryID='".$db->real_escape_string($data->categoryID)."', textblock='".$db->real_escape_string($data->textblock)."', title='".$db->real_escape_string($data->performance)."', title='".$db->real_escape_string($data->title)."' WHERE blockID=".$db->real_escape_string($data->blockTextID));
+            $db->query("UPDATE textblocks SET categoryID='".$db->real_escape_string($data->categoryID)."', textblock='".$db->real_escape_string($data->textBlock)."', performance='".$db->real_escape_string($data->performance)."', title='".$db->real_escape_string($data->title)."' WHERE blockID=".$db->real_escape_string($data->textBlockID));
+            $res = $db->query("SELECT color from categories WHERE categoryID='".$db->real_escape_string($data->categoryID)."'");
+            $r = $res->fetch_row();
+            $data->color = $r[0];
+            echo json_encode($data);
+            break;
+
+        case "removeTextBlock":
+            $db->query("DELETE FROM textblocks WHERE blockID=" . $db->real_escape_string($data));
             break;
     }
 }

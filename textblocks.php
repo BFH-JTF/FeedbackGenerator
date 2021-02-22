@@ -37,9 +37,9 @@ foreach ($r as $cat){
     <div class="container-fluid text-center mt-3 mb-3 d-flex justify-content-center">
         <?php echo $buttonString;?>
     </div>
-    <p><input id="tickFilter" type="checkbox" onchange="filterSwitch()" checked> <label for="tickFilter">Filter by Performance</label> (<span id="performanceValue">5</span>)</p>
+    <p><input id="tickFilter" type="checkbox" onchange="filterSwitch()" checked> <label for="tickFilter">Filter by Performance</label> (<span id="performanceValue">3</span>)</p>
     <div class="slidecontainer">
-        <input type="range" min="1" max="10" value="5" class="slider" id="performanceSlider" oninput="performanceChange(this)">
+        <input type="range" min="1" max="4" value="3" class="slider" id="performanceSlider" oninput="performanceChange(this)">
     </div>
     <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#TextBlockModal" onclick="fillTextBlockModal(null)">New Text Block</button>
 </div>
@@ -69,7 +69,7 @@ foreach ($r as $cat){
 
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
-                            <span class="input-group-text" id="catColor0">Category Category</span>
+                            <span class="input-group-text" id="catColor0">TextBlock Category</span>
                         </div>
                         <select id="TextBlockModalCategorySelect" size="1">
                             <?php echo $optionString;?>
@@ -80,7 +80,7 @@ foreach ($r as $cat){
                         <div class="input-group-prepend">
                             <span class="input-group-text">Performance Level&nbsp;<span id="modalPerformanceValue">4</span></span>
                         </div>
-                        <input type="range" min="1" max="10" value="5" class="slider" id="TextBlockModalPerformanceSlider" oninput="modalPerformanceChange(this)">
+                        <input type="range" min="1" max="4" value="3" class="slider" id="TextBlockModalPerformanceSlider" oninput="modalPerformanceChange(this)">
                     </div>
 
                     <div class="input-group mb-3">

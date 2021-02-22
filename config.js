@@ -26,7 +26,7 @@ function APIsend(action, data){
             break;
 
         case "saveTextBlock":
-            callbackFunction = getTextBlocksCallback;
+            callbackFunction = saveTextBlockCallback;
             break;
     }
     $.post("api.php", {action: action, data: data}, callbackFunction);
