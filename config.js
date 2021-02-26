@@ -31,9 +31,3 @@ function APIsend(action, data){
     }
     $.post("api.php", {action: action, data: data}, callbackFunction);
 }
-
-function logout(){
-    document.cookie = "FBG-ID=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/fbg; domain=.smari.pantek.ch";
-    document.cookie = "FBG-Token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/fbg; domain=.smari.pantek.ch";
-    document.location.href = "https://smari.pantek.ch/fbg/index.php";
-}

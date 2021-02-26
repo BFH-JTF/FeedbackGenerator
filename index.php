@@ -23,24 +23,7 @@ $db->close();
 <body>
 <div class="container-fluid m-4 text-center">
     <h2>Feedback Generator</h2>
-    <p class="text-body font-italic m-5">[Add login instructions here]</p>
-    <div class="container d-flex justify-content-around flex-wrap w-25" id="LoginFormContainer" style="min-width: 480px">
-        <form method="post" action="login.php">
-            <div class="input-group mb-3 form-group-lg">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">UserID</span>
-                </div>
-                <input id="UserID" name="UserID" type="text" class="form-control input-lg" placeholder="user name" aria-label="user name">
-            </div>
-            <div class="input-group mb-3 form-group-lg">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">Password</span>
-                </div>
-                <input id="Password" name="Password" type="password" class="form-control input-lg" placeholder="password" aria-label="user password" size="3">
-            </div>
-            <input type="submit" class="btn btn-success" value="Login">
-        </form>
-    </div>
+    Not logged in
 </div>
 </body>
 </html>
