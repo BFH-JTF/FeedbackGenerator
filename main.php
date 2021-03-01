@@ -13,7 +13,7 @@ foreach ($r as $cat){
     $buttonString .= '<button class="btn btn-outline-light m-1 border border-dark" style="background-color: '.$cat["color"].'" data-color="'.$cat["color"].'" data-status="enabled" data-category="'.$cat["categoryID"].'" onclick="categoryButtonClick(this)">'.$cat["name"].'</button>';
 }
 
-$submissionID = $_GET["sid"] // FIXME How is submission ID handed over?
+$assignmentID = $_SESSION["assignmentID"];
 ?>
 <html lang="en">
 <head>
