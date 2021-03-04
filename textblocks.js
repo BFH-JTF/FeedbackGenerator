@@ -1,5 +1,5 @@
 let currentCategories = [];
-let currentPerformance = 5;
+let currentPerformance = 3;
 let performanceFilterActive = true;
 
 function pageLoaded(){
@@ -33,13 +33,8 @@ function updateCards(){
         let smallNode = $(card).find("small")[0];
         smallNode.innerText = smallNode.getAttribute("data-performance");
         let test = Number(smallNode.getAttribute("data-category"));
-        if(currentCategories.includes(test) &&
-            (performanceFilterActive === false || currentPerformance === Number(smallNode.getAttribute("data-performance")))){
-            card.hidden = false;
-        }
-        else {
-            card.hidden = true;
-        }
+        card.hidden = !(currentCategories.includes(test) &&
+            (performanceFilterActive === false || currentPerformance === Number(smallNode.getAttribute("data-performance"))));
     }
 }
 
@@ -143,6 +138,7 @@ function getTextBlocksCallback(data, status){
     let d = JSON.parse(data);
     for (let c of d){
         addTextBlockTile(c);
+
         currentCategories.push(Number(c.categoryID));
     }
     currentCategories = currentCategories.filter((e, i) => currentCategories.indexOf(e) === i);
@@ -160,9 +156,7 @@ function addTextBlockCallback(data, status){
 
 function saveTextBlockCallback(data, status){
     let d = JSON.parse(data);
-    console.log(d);
     let element = document.querySelector('[data-id="' + d.textBlockID +'"]');
-    console.log(element);
     let cardTitle = element.getElementsByClassName("card-title")[0];
     cardTitle.innerText = d.title;
     element.getElementsByClassName("card-text")[0].innerText = d.textBlock;
