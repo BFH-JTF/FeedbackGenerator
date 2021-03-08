@@ -12,7 +12,7 @@ $optionString = "";
 $buttonString = "";
 foreach ($r as $cat){
     $optionString .= "<option value='".$cat["categoryID"]."'>".$cat["name"]."</option>";
-    $buttonString .= '<button class="btn btn-outline-light m-1 border border-dark" style="background-color: '.$cat["color"].'" data-color="'.$cat["color"].'" data-status="enabled" data-category="'.$cat["categoryID"].'" onclick="categoryButtonClick(this)">'.$cat["name"].'</button>';
+    $buttonString .= '<button class="btn btn-outline-secondary" data-color="'.$cat["color"].'" data-status="disabled" data-category="'.$cat["categoryID"].'" onclick="categoryButtonClick(this)">'.$cat["name"].'</button>';
 }
 ?>
 
@@ -37,7 +37,7 @@ foreach ($r as $cat){
     <div class="container-fluid text-center mt-3 mb-3 d-flex justify-content-center">
         <?php echo $buttonString;?>
     </div>
-    <p><input id="tickFilter" type="checkbox" onchange="filterSwitch()" checked> <label for="tickFilter">Filter by Performance</label> (<span id="performanceValue">3</span>)</p>
+    <p><input id="tickFilter" type="checkbox" onchange="filterSwitch()"> <label for="tickFilter">Filter by Performance</label> (<span id="performanceValue">3</span>)</p>
     <div class="slidecontainer">
         <input type="range" min="1" max="4" value="3" class="slider" id="performanceSlider" oninput="performanceChange(this)">
     </div>

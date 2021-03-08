@@ -1,6 +1,6 @@
 let currentCategories = [];
 let currentPerformance = 3;
-let performanceFilterActive = true;
+let performanceFilterActive = false;
 
 function pageLoaded(){
     APIsend("getTextBlocks", null);
@@ -33,7 +33,7 @@ function updateCards(){
         let smallNode = $(card).find("small")[0];
         smallNode.innerText = smallNode.getAttribute("data-performance");
         let test = Number(smallNode.getAttribute("data-category"));
-        card.hidden = !(currentCategories.includes(test) &&
+        card.hidden = !((currentCategories.includes(test) || currentCategories.length === 0) &&
             (performanceFilterActive === false || currentPerformance === Number(smallNode.getAttribute("data-performance"))));
     }
 }
@@ -138,10 +138,7 @@ function getTextBlocksCallback(data, status){
     let d = JSON.parse(data);
     for (let c of d){
         addTextBlockTile(c);
-
-        currentCategories.push(Number(c.categoryID));
     }
-    currentCategories = currentCategories.filter((e, i) => currentCategories.indexOf(e) === i);
     updateCards();
 }
 

@@ -1,12 +1,11 @@
-let clickLoop = false;
 let currentCategories = [];
 let currentPerformance = 3;
-let performanceFilterActive = true;
+let performanceFilterActive = false;
+let submissionData = {};
 
 function pageInit() {
     $( "#activeFeedbackItems" ).sortable();
     $( "#activeFeedbackItems" ).disableSelection();
-    const assignmentID = 4; // FIXME For development only
     updateFeedbackOptions();
     getAssignmentData(assignmentID, "")
     $("#assignmentID").text(assignmentID);
@@ -16,7 +15,7 @@ function pageInit() {
 function updateFeedbackOptions(){
     let options = $("#passiveFeedbackItems").children();
     for(let option of options){
-        option.hidden = !(currentCategories.includes(Number(option.getAttribute("data-category"))) &&
+        option.hidden = !((currentCategories.includes(Number(option.getAttribute("data-category"))) || currentCategories.length === 0) &&
             (performanceFilterActive === false || currentPerformance === Number(option.getAttribute("data-performance"))));
     }
 }
@@ -104,6 +103,7 @@ function getAssignmentData(aID, webserviceToken){
         "                    \"feedbackcomments\": \"Test123\",\n" +
         "                    \"files\":\n" +
         "                    [\n" +
+        "                      \"https:\\/\\/z3learning.com\\/moodle\\/pluginfile.php?file=%2F50%2Fassignsubmission_file%2Fsubmission_files%2F2%2FLocal%20Feedback%20v2.postman_collection.json\"," +
         "                      \"https:\\/\\/z3learning.com\\/moodle\\/pluginfile.php?file=%2F50%2Fassignsubmission_file%2Fsubmission_files%2F2%2FLocal%20Feedback%20v2.postman_collection.json\"\n" +
         "                    ]\n" +
         "                }\n" +
@@ -129,7 +129,7 @@ function getAssignmentData(aID, webserviceToken){
         $.ajax(settings).done(function (response) {
             setAssignmentData(JSON.parse(assignmentData).response);
         });
-    */
+        */
 }
 
 function setAssignmentData(data){
@@ -146,11 +146,18 @@ function setAssignmentData(data){
         }
         document.getElementById("submissionList").appendChild(subEntry);
     }
-    // <a id="sub1" class="list-group-item list-group-item-action"><i class="far fa-circle mr-2" style="color: Tomato;"></i>Troy Partridge<i class="fas fa-envelope-open-text ml-2"></i></a>
+    submissionData = data.submissions;
 }
 
 function submissionClick(submissionID){
-    document.getElementById("activeFeedbackItems").innerHTML = "";
+    $("#activeFeedbackItems").children().each(function () {
+        $(this).children("span.clickField").each(function (){
+            activeFeedbackClick($(this)[0]);
+        });
+    })
+    $("#submissionList").children().each(function() {
+       $(this).css("background-color", "#AAAA");
+    });
     getSubmissionData(submissionID);
 }
 
@@ -172,8 +179,9 @@ function getSubmissionData(submissionID, webserviceToken){
         "    ]\n" +
         "  }\n" +
         "}";
-    /*
-    const settings = {
+        setSubmissionData(JSON.parse(submissionData)["response"]);
+
+    /*const settings = {
         "async": true,
         "crossDomain": true,
         "url": "https://z3learning.com/moodle/webservice/restful/server.php/webservice/restful/server.php/local_feedback_get_submission",
@@ -188,16 +196,26 @@ function getSubmissionData(submissionID, webserviceToken){
         "data": "{\n  \"request\": {\n    \"submissionid\": " + submissionID + "\n  }\n} "
     };
     $.ajax(settings).done(function (response) {
+        alert(response);
         setSubmissionData(JSON.parse(submissionData)["response"]);
-    });
-    */
-    setSubmissionData(JSON.parse(submissionData)["response"]);
+    });*/
 }
 
 function setSubmissionData(submissionData){
     console.log(submissionData);
+    $("#finaltext").val(submissionData.feedbackcomments);
+    $("#grade").val(submissionData.grade);
+    let date = new Date(submissionData.timesubmitted*1000);
+    $("#submissionTimeString").text(date.getDate()+"."+(date.getMonth()+1)+"."+date.getFullYear()+" "+date.getHours()+":"+date.getMinutes()+":"+date.getSeconds());
     document.getElementById("mainScreen").hidden = false;
+    document.getElementById("currentScreen").hidden = false;
     document.getElementById("studName").innerText = submissionData.firstname + " " + submissionData.lastname;
+    let linkString = "";
+    for (let file of submissionData.files){
+        linkString += "<a target='_blank' href='"+ file + "'><i class=\"fas fa-envelope-open-text ml-1 mr-1\" data-toggle=\"tooltip\" title=\"Open " + file + "\"></i></a>";
+    }
+    $("#attachments").html(linkString);
+    // TODO Add Link to attachments
 }
 
 function getTextBlocksCallback(data, status){
@@ -207,25 +225,26 @@ function getTextBlocksCallback(data, status){
         let listItem = document.createElement("li");
         listItem.setAttribute("data-category", c.categoryID);
         listItem.setAttribute("data-performance", c.performance);
-        listItem.setAttribute("class", "ui-state-default");
-        listItem.innerHTML = "<span style=\"color: forestgreen;\"\n" + "onClick=\"passiveFeedbackClick(this)\"><i\n class=\"fas fa-plus mr-2\"></i></span><br><span class='textblocktext'>" + c.textblock + "</span>";
+        listItem.setAttribute("class", "ui-state-default overflow-hidden");
+        listItem.innerHTML = "<span class='clickField' style=\"color: forestgreen;\"\n" + "onClick=\"passiveFeedbackClick(this)\"><i\n class=\"fas fa-plus mr-2\"></i></span><br><span class='textblocktitle'>" + c.title + "</span><br><span class='textblocktext'>" + c.textblock + "</span>";
         document.getElementById("passiveFeedbackItems").appendChild(listItem);
-        currentCategories.push(Number(c.categoryID));
     }
-    currentCategories = currentCategories.filter((e, i) => currentCategories.indexOf(e) === i);
     updateFeedbackOptions();
 }
 
 function generateFeedbackText(){
     let feedbackText = "";
-    for (let element in $("#activeFeedbackItems").children()){
+    $('#activeFeedbackItems').children().each(function () {
         // TODO Look for elements containing text
-        $(".textblocktext").each(function (index, object){
-            if (feedbackText.length > 0){
-                feedbackText += " " + $(this);
+        console.log($(this));
+        $(this).children("span.textblocktext").each(function ()
+        {
+            console.log($(this));
+            if (feedbackText.length > 0) {
+                feedbackText += " ";
             }
-            feedbackText += $(this);
+            feedbackText += $(this).text();
         });
-    }
-    return feedbackText;
+    });
+    $("#finaltext").val(feedbackText);
 }
