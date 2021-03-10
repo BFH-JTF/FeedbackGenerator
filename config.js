@@ -28,6 +28,10 @@ function APIsend(action, data){
         case "saveTextBlock":
             callbackFunction = saveTextBlockCallback;
             break;
+
+        case "getAssignmentData":
+            callbackFunction = getAssignmentDataCallback;
+            break;
     }
     $.post("api.php", {action: action, data: data}, callbackFunction);
 }

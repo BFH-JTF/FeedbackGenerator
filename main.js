@@ -1,13 +1,14 @@
 let currentCategories = [];
 let currentPerformance = 3;
 let performanceFilterActive = false;
-let submissionData = {};
+let submissionDataRecord = {};
+const wstoken = "e79194eefde7be3e324203166576fc66";
 
 function pageInit() {
     $( "#activeFeedbackItems" ).sortable();
     $( "#activeFeedbackItems" ).disableSelection();
     updateFeedbackOptions();
-    getAssignmentData(assignmentID, "")
+    getAssignmentData(assignmentID, wstoken)
     $("#assignmentID").text(assignmentID);
     APIsend("getTextBlocks", null);
 }
@@ -74,7 +75,7 @@ function activeFeedbackClick(e) {
 }
 
 function getAssignmentData(aID, webserviceToken){
-    let assignmentData = "{\n" +
+    /*let assignmentData = "{\n" +
         "        \"response\": {\n" +
         "            \"batch\": {\n" +
         "                \"totalpages\": 1,\n" +
@@ -110,26 +111,29 @@ function getAssignmentData(aID, webserviceToken){
         "            ]\n" +
         "        }\n" +
         "    }";
-    setAssignmentData(JSON.parse(assignmentData).response);
-    /*
-        const settings = {
-            "async": true,
-            "crossDomain": true,
-            "url": "https://z3learning.com/moodle/webservice/restful/server.php/local_feedback_list_submissions",
-            "method": "POST",
-            "headers": {
-                "Content-Type": "application/json",
-                "Authorization": webserviceToken,
-                "HTTP_ACCEPT": "application/json",
-                "HTTP_CONTENT_TYPE": "application/json",
-                "Accept": "application/json"
-            },
-            "data": "{\n  \"request\": {\n    \"assignid\": " + aID + "\n  }\n} "
-        };
-        $.ajax(settings).done(function (response) {
-            setAssignmentData(JSON.parse(assignmentData).response);
-        });
-        */
+    setAssignmentData(JSON.parse(assignmentData).response);*/
+
+    /*const settings = {
+        "async": true,
+        "crossDomain": true,
+        "url": "https://moodle-test.bfh.ch/webservice/restful/server.php/local_feedback_list_submissions",
+        "method": "POST",
+        "headers": {
+            "Content-Type": "application/json",
+            "Authorization": webserviceToken,
+            "HTTP_ACCEPT": "application/json",
+            "HTTP_CONTENT_TYPE": "application/json",
+            "Accept": "application/json"
+        },
+        "data": "{\n  \"request\": {\n    \"assignid\": " + aID + "\n  }\n} "
+    };
+    $.ajax(settings).done(function (response) {
+        setAssignmentData(JSON.parse(assignmentData).response).fail(function( jqXHR, textStatus, errorThrown ){
+            alert("Error occurred: " + response);
+        });;
+    });*/
+
+    APIsend("getAssignmentData", "{\"assignid\": \""+aID+"\", \"wstoken\": \""+webserviceToken+"\"}");
 }
 
 function setAssignmentData(data){
@@ -158,7 +162,7 @@ function submissionClick(submissionID){
     $("#submissionList").children().each(function() {
        $(this).css("background-color", "#AAAA");
     });
-    getSubmissionData(submissionID);
+    getSubmissionData(submissionID, wstoken);
 }
 
 function getSubmissionData(submissionID, webserviceToken){
@@ -184,7 +188,7 @@ function getSubmissionData(submissionID, webserviceToken){
     /*const settings = {
         "async": true,
         "crossDomain": true,
-        "url": "https://z3learning.com/moodle/webservice/restful/server.php/webservice/restful/server.php/local_feedback_get_submission",
+        "url": "https://moodle-test.bfh.ch/webservice/restful/server.php/local_feedback_list_submissions",
         "method": "POST",
         "headers": {
             "Content-Type": "application/json",
@@ -196,13 +200,16 @@ function getSubmissionData(submissionID, webserviceToken){
         "data": "{\n  \"request\": {\n    \"submissionid\": " + submissionID + "\n  }\n} "
     };
     $.ajax(settings).done(function (response) {
-        alert(response);
-        setSubmissionData(JSON.parse(submissionData)["response"]);
+        console.log(response);
+        setSubmissionData(JSON.parse(submissionData)["response"]).fail(function( jqXHR, textStatus, errorThrown ){
+            alert("Error occurred: " + response);
+        });
     });*/
 }
 
 function setSubmissionData(submissionData){
     console.log(submissionData);
+    submissionDataRecord = submissionData;
     $("#finaltext").val(submissionData.feedbackcomments);
     $("#grade").val(submissionData.grade);
     let date = new Date(submissionData.timesubmitted*1000);
@@ -215,7 +222,17 @@ function setSubmissionData(submissionData){
         linkString += "<a target='_blank' href='"+ file + "'><i class=\"fas fa-envelope-open-text ml-1 mr-1\" data-toggle=\"tooltip\" title=\"Open " + file + "\"></i></a>";
     }
     $("#attachments").html(linkString);
-    // TODO Add Link to attachments
+}
+
+function getAssignmentDataCallback(data, status){
+    console.log(data);
+    let d = JSON.parse(data);
+     if ("exception" in d){
+         alert(data);
+     }
+     else{
+         setAssignmentData(data);
+     }
 }
 
 function getTextBlocksCallback(data, status){
@@ -235,16 +252,36 @@ function getTextBlocksCallback(data, status){
 function generateFeedbackText(){
     let feedbackText = "";
     $('#activeFeedbackItems').children().each(function () {
-        // TODO Look for elements containing text
-        console.log($(this));
         $(this).children("span.textblocktext").each(function ()
         {
-            console.log($(this));
             if (feedbackText.length > 0) {
                 feedbackText += " ";
             }
             feedbackText += $(this).text();
         });
     });
+    feedbackText = feedbackText.replace("[FIRSTNAME]", submissionDataRecord.firstname);
+    feedbackText = feedbackText.replace("[LASTNAME]", submissionDataRecord.lastname);
     $("#finaltext").val(feedbackText);
+}
+
+function saveMoodle(){
+    const settings = {
+        "async": true,
+        "crossDomain": true,
+        "url": "https://moodle-test.bfh.ch/webservice/restful/server.php/local_feedback_update_grade",
+        "method": "POST",
+        "headers": {
+            "Content-Type": "application/json",
+            "Authorization": wstoken,
+            "HTTP_ACCEPT": "application/json",
+            "HTTP_CONTENT_TYPE": "application/json",
+            "Accept": "application/json"
+        },
+        "data": "{\"request\": {\"submissionid\": " + submissionDataRecord.submissionid + "2,\"grade\":" + $("#grade").val() + ", \"feedback\":\"" + $("#finaltext") + "\"}} "
+    };
+
+    $.ajax(settings).done(function (response) {
+        console.log(response);
+    });
 }

@@ -66,6 +66,28 @@ if (userAuthenticated() && isset($_POST["action"]) && isset($_POST["data"])){
         case "removeTextBlock":
             $db->query("DELETE FROM textblocks WHERE blockID=" . $db->real_escape_string($data));
             break;
+
+        case "getAssignmentData":
+            $curl = curl_init();
+            curl_setopt_array($curl, [
+                CURLOPT_URL => "https://moodle-test.bfh.ch/webservice/restful/server.php/local_feedback_list_submissions",
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => "",
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => "POST",
+                CURLOPT_POSTFIELDS => "{\n  \"request\": {\n    \"assignid\": ".$data->assignid."\n  }\n} ",
+                CURLOPT_HTTPHEADER => [
+                    "Accept: application/json",
+                    "Authorization: ".$data->wstoken,
+                    "Content-Type: application/json",
+                    "HTTP_ACCEPT: application/json",
+                    "HTTP_CONTENT_TYPE: application/json"
+                ],
+            ]);
+            echo curl_exec($curl);
+            break;
     }
 }
 else{

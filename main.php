@@ -29,7 +29,7 @@ $assignmentID = $_SESSION["assignmentID"];
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.js"></script>
     <script type="text/javascript" src="config.js"></script>
     <script type="text/javascript" src="main.js"></script>
-    <script type="text/javascript">const assignmentID = <?php echo $_SESSION["assignmentID"];?></script>
+    <script type="text/javascript">const assignmentID = <?php echo $assignmentID;?></script>
     <style type='text/css'>
         .btn-green {
             background-color: #1ab394;
@@ -101,7 +101,7 @@ $assignmentID = $_SESSION["assignmentID"];
                 <input id="grade" type="text" class="form-control">
             </div>
             <textarea id="finaltext" class="form-control">This is the current feedback text</textarea>
-            <button class="btn btn-success mt-3">Save to Moodle</button>
+            <button class="btn btn-success mt-3" onclick="saveMoodle()">Save to Moodle</button>
         </div>
     </div>
 </div>
