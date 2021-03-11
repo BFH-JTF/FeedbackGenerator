@@ -32,6 +32,14 @@ function APIsend(action, data){
         case "getAssignmentData":
             callbackFunction = getAssignmentDataCallback;
             break;
+
+        case "getSubmissionData":
+            callbackFunction = getSubmissionDataCallback
+            break;
+
+        case "giveFeedback":
+            callbackFunction = giveFeedbackCallback;
+            break;
     }
     $.post("api.php", {action: action, data: data}, callbackFunction);
 }

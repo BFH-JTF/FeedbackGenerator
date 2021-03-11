@@ -54,7 +54,11 @@ $assignmentID = $_SESSION["assignmentID"];
 </head>
 <body style="background-color: #fafafa;" onload="pageInit()">
 <?php include("navbar.html");?>
-
+<div id="loadSpinner" class="text-center container-fluid">
+    <div class="spinner-border" role="status">
+        Loading ...
+    </div>
+</div>
 <div class="row">
     <div class="col-sm-2">
         <h5 class="text-center">Assignment ID: <span id="assignmentID"></span> </h5>
@@ -63,7 +67,6 @@ $assignmentID = $_SESSION["assignmentID"];
     <div id="mainScreen" class="col-sm-6" hidden>
         <div class="container-fluid text-center mt-3 mb-3">
             <p class="h2 d-block">Feedback Editor </p>
-<!--            TODO Read file URL and create icon for each-->
             <u>Submission at <span id="submissionTimeString"></span> by <span id="studName"></span> (<span id="attachments"><i class="fas fa-envelope-open-text" data-toggle="tooltip" title="Open submission"></i></span>)</u>
             <p>Filter by Category</p>
             <div class="container-fluid text-center mt-3 mb-3 d-flex justify-content-center">
@@ -100,7 +103,7 @@ $assignmentID = $_SESSION["assignmentID"];
                 </div>
                 <input id="grade" type="text" class="form-control">
             </div>
-            <textarea id="finaltext" class="form-control">This is the current feedback text</textarea>
+            <textarea id="finaltext" class="form-control" rows="5">This is the current feedback text</textarea>
             <button class="btn btn-success mt-3" onclick="saveMoodle()">Save to Moodle</button>
         </div>
     </div>

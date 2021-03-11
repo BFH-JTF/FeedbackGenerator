@@ -77,7 +77,7 @@ if (userAuthenticated() && isset($_POST["action"]) && isset($_POST["data"])){
                 CURLOPT_TIMEOUT => 30,
                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
                 CURLOPT_CUSTOMREQUEST => "POST",
-                CURLOPT_POSTFIELDS => "{\n  \"request\": {\n    \"assignid\": ".$data->assignid."\n  }\n} ",
+                CURLOPT_POSTFIELDS => "{\n  \"request\": {\n    \"cmid\": ".$data->assignid."\n  }\n} ",
                 CURLOPT_HTTPHEADER => [
                     "Accept: application/json",
                     "Authorization: ".$data->wstoken,
@@ -85,6 +85,51 @@ if (userAuthenticated() && isset($_POST["action"]) && isset($_POST["data"])){
                     "HTTP_ACCEPT: application/json",
                     "HTTP_CONTENT_TYPE: application/json"
                 ],
+            ]);
+            echo curl_exec($curl);
+            break;
+
+        case "getSubmissionData":
+            $curl = curl_init();
+            curl_setopt_array($curl, [
+                CURLOPT_URL => "https://moodle-test.bfh.ch/webservice/restful/server.php/local_feedback_get_submission",
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => "",
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => "POST",
+                CURLOPT_POSTFIELDS => "{\n  \"request\": {\n    \"submissionid\": ".$data->submissionid."\n  }\n} ",
+                CURLOPT_HTTPHEADER => [
+                    "Accept: application/json",
+                    "Authorization: ".$data->wstoken,
+                    "Content-Type: application/json",
+                    "HTTP_ACCEPT: application/json",
+                    "HTTP_CONTENT_TYPE: application/json"
+                ],
+            ]);
+            echo curl_exec($curl);
+            break;
+
+        case "giveFeedback":
+            $curl = curl_init();
+            curl_setopt_array($curl, [
+                CURLOPT_URL => "https://moodle-test.bfh.ch/webservice/restful/server.php/local_feedback_update_grade",
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => "",
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => "POST",
+                CURLOPT_HTTPHEADER => [
+                    "Accept: application/json",
+                    "Authorization: ".$data->wstoken,
+                    "Content-Type: application/json",
+                    "HTTP_ACCEPT: application/json",
+                    "HTTP_CONTENT_TYPE: application/json"
+                ],
+                CURLOPT_POSTFIELDS => "{\"request\": {\"submissionid\": ".$data->submissionid.", \"grade\": \"".$data->grade."\", \"feedback\": \"".$data->feedback."\"}} ",
+
             ]);
             echo curl_exec($curl);
             break;

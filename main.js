@@ -52,7 +52,6 @@ function categoryFilterButtonClick(element){
 }
 
 function passiveFeedbackClick(e) {
-    console.log(e);
     document.getElementById("activeFeedbackItems").appendChild(e.parentNode);
     e.style = "color: Tomato;";
     e.setAttribute("onclick", "activeFeedbackClick(this)");
@@ -63,7 +62,6 @@ function passiveFeedbackClick(e) {
     }
 }
 function activeFeedbackClick(e) {
-    console.log(e);
     document.getElementById("passiveFeedbackItems").appendChild(e.parentNode);
     e.setAttribute("onclick", "passiveFeedbackClick(this)");
     e.style = "color: forestgreen;";
@@ -75,74 +73,18 @@ function activeFeedbackClick(e) {
 }
 
 function getAssignmentData(aID, webserviceToken){
-    /*let assignmentData = "{\n" +
-        "        \"response\": {\n" +
-        "            \"batch\": {\n" +
-        "                \"totalpages\": 1,\n" +
-        "                \"totalitems\": 1,\n" +
-        "                \"page\": 1,\n" +
-        "                \"perpage\": 100\n" +
-        "            },\n" +
-        "            \"grademodel\": {\n" +
-        "                \"gradetype\": \"Value\",\n" +
-        "                \"grademin\": 0,\n" +
-        "                \"grademax\": 100,\n" +
-        "                \"scalemenu\": []\n" +
-        "            },\n" +
-        "            \"submissions\":\n" +
-        "            [\n" +
-        "                {\n" +
-        "                    \"studentid\": 4,\n" +
-        "                    \"firstname\": \"Albert\",\n" +
-        "                    \"lastname\": \"Einstein\",\n" +
-        "                    \"email\": \"student1@sdas.com\",\n" +
-        "                    \"status\": \"submitted\",\n" +
-        "                    \"submissionid\": 2,\n" +
-        "                    \"grade\": 76.599999999999994,\n" +
-        "                    \"timesubmitted\": 1614079791,\n" +
-        "                    \"timemarked\": 1613737171,\n" +
-        "                    \"feedbackcomments\": \"Test123\",\n" +
-        "                    \"files\":\n" +
-        "                    [\n" +
-        "                      \"https:\\/\\/z3learning.com\\/moodle\\/pluginfile.php?file=%2F50%2Fassignsubmission_file%2Fsubmission_files%2F2%2FLocal%20Feedback%20v2.postman_collection.json\"," +
-        "                      \"https:\\/\\/z3learning.com\\/moodle\\/pluginfile.php?file=%2F50%2Fassignsubmission_file%2Fsubmission_files%2F2%2FLocal%20Feedback%20v2.postman_collection.json\"\n" +
-        "                    ]\n" +
-        "                }\n" +
-        "            ]\n" +
-        "        }\n" +
-        "    }";
-    setAssignmentData(JSON.parse(assignmentData).response);*/
-
-    /*const settings = {
-        "async": true,
-        "crossDomain": true,
-        "url": "https://moodle-test.bfh.ch/webservice/restful/server.php/local_feedback_list_submissions",
-        "method": "POST",
-        "headers": {
-            "Content-Type": "application/json",
-            "Authorization": webserviceToken,
-            "HTTP_ACCEPT": "application/json",
-            "HTTP_CONTENT_TYPE": "application/json",
-            "Accept": "application/json"
-        },
-        "data": "{\n  \"request\": {\n    \"assignid\": " + aID + "\n  }\n} "
-    };
-    $.ajax(settings).done(function (response) {
-        setAssignmentData(JSON.parse(assignmentData).response).fail(function( jqXHR, textStatus, errorThrown ){
-            alert("Error occurred: " + response);
-        });;
-    });*/
-
     APIsend("getAssignmentData", "{\"assignid\": \""+aID+"\", \"wstoken\": \""+webserviceToken+"\"}");
+    $("#loadSpinner").show();
 }
 
 function setAssignmentData(data){
+    console.log(data["submissions"]);
     for (let c=0; c < data["submissions"].length; c++){
         let subEntry = document.createElement("a");
         subEntry.setAttribute("class", "list-group-item list-group-item-action");
         subEntry.setAttribute("id", "submission" + data["submissions"][c]["submissionid"]);
-        subEntry.setAttribute("onclick", "submissionClick(" + data["submissions"][c]["submissionid"] + ")");
-        if (data["submissions"][c]["status"] !== "submitted"){
+        subEntry.setAttribute("onclick", "submissionClick(this, " + data["submissions"][c]["submissionid"] + ")");
+        if (data["submissions"][c]["status"] === "graded"){
             subEntry.innerHTML = "<i class=\"far fa-check-circle mr-2\" style=\"color: Forestgreen\"></i>" + data["submissions"][c]["firstname"] + " " + data["submissions"][c]["lastname"];
         }
         else{
@@ -153,58 +95,22 @@ function setAssignmentData(data){
     submissionData = data.submissions;
 }
 
-function submissionClick(submissionID){
+function submissionClick(element, submissionID){
     $("#activeFeedbackItems").children().each(function () {
         $(this).children("span.clickField").each(function (){
             activeFeedbackClick($(this)[0]);
         });
     })
     $("#submissionList").children().each(function() {
-       $(this).css("background-color", "#AAAA");
+       $(this).css("background-color", "");
     });
+    element.style.backgroundColor = "#8888"
     getSubmissionData(submissionID, wstoken);
 }
 
 function getSubmissionData(submissionID, webserviceToken){
-    let submissionData = "{\n" +
-        "  \"response\": {\n" +
-        "    \"studentid\": 4,\n" +
-        "    \"firstname\": \"Albert\",\n" +
-        "    \"lastname\": \"Einstein\",\n" +
-        "    \"email\": \"student1@sdas.com\",\n" +
-        "    \"status\": \"submitted\",\n" +
-        "    \"submissionid\": 2,\n" +
-        "    \"grade\": 76.599999999999994,\n" +
-        "    \"timesubmitted\": 1614079791,\n" +
-        "    \"timemarked\": 1613737171,\n" +
-        "    \"feedbackcomments\": \"Test123\",\n" +
-        "    \"files\": [\n" +
-        "      \"https:\\/\\/z3learning.com\\/moodle\\/pluginfile.php?file=%2F50%2Fassignsubmission_file%2Fsubmission_files%2F2%2FLocal%20Feedback%20v2.postman_collection.json\"\n" +
-        "    ]\n" +
-        "  }\n" +
-        "}";
-        setSubmissionData(JSON.parse(submissionData)["response"]);
-
-    /*const settings = {
-        "async": true,
-        "crossDomain": true,
-        "url": "https://moodle-test.bfh.ch/webservice/restful/server.php/local_feedback_list_submissions",
-        "method": "POST",
-        "headers": {
-            "Content-Type": "application/json",
-            "Authorization": webserviceToken,
-            "HTTP_ACCEPT": "application/json",
-            "HTTP_CONTENT_TYPE": "application/json",
-            "Accept": "application/json"
-        },
-        "data": "{\n  \"request\": {\n    \"submissionid\": " + submissionID + "\n  }\n} "
-    };
-    $.ajax(settings).done(function (response) {
-        console.log(response);
-        setSubmissionData(JSON.parse(submissionData)["response"]).fail(function( jqXHR, textStatus, errorThrown ){
-            alert("Error occurred: " + response);
-        });
-    });*/
+    APIsend("getSubmissionData", "{\"submissionid\": \""+submissionID+"\", \"wstoken\": \""+webserviceToken+"\"}");
+    $("#loadSpinner").show();
 }
 
 function setSubmissionData(submissionData){
@@ -218,21 +124,37 @@ function setSubmissionData(submissionData){
     document.getElementById("currentScreen").hidden = false;
     document.getElementById("studName").innerText = submissionData.firstname + " " + submissionData.lastname;
     let linkString = "";
-    for (let file of submissionData.files){
-        linkString += "<a target='_blank' href='"+ file + "'><i class=\"fas fa-envelope-open-text ml-1 mr-1\" data-toggle=\"tooltip\" title=\"Open " + file + "\"></i></a>";
+    if (submissionData.files.length > 0) {
+        for (let file of submissionData.files) {
+            linkString += "<a target='_blank' href='" + file + "'><i class=\"fas fa-envelope-open-text ml-1 mr-1\" data-toggle=\"tooltip\" title=\"Open " + file + "\"></i></a>";
+        }
+        $("#attachments").html(linkString);
     }
-    $("#attachments").html(linkString);
+    else{
+        $("#attachments").html("no files submitted");
+    }
 }
 
 function getAssignmentDataCallback(data, status){
-    console.log(data);
-    let d = JSON.parse(data);
+    $("#loadSpinner").hide();
+    let d = JSON.parse(data).response;
      if ("exception" in d){
          alert(data);
      }
      else{
-         setAssignmentData(data);
+         setAssignmentData(d);
      }
+}
+
+function getSubmissionDataCallback(data, status){
+    $("#loadSpinner").hide();
+    let d = JSON.parse(data).response;
+    if ("exception" in d){
+        alert(data);
+    }
+    else{
+        setSubmissionData(d);
+    }
 }
 
 function getTextBlocksCallback(data, status){
@@ -266,22 +188,20 @@ function generateFeedbackText(){
 }
 
 function saveMoodle(){
-    const settings = {
-        "async": true,
-        "crossDomain": true,
-        "url": "https://moodle-test.bfh.ch/webservice/restful/server.php/local_feedback_update_grade",
-        "method": "POST",
-        "headers": {
-            "Content-Type": "application/json",
-            "Authorization": wstoken,
-            "HTTP_ACCEPT": "application/json",
-            "HTTP_CONTENT_TYPE": "application/json",
-            "Accept": "application/json"
-        },
-        "data": "{\"request\": {\"submissionid\": " + submissionDataRecord.submissionid + "2,\"grade\":" + $("#grade").val() + ", \"feedback\":\"" + $("#finaltext") + "\"}} "
-    };
+    APIsend("giveFeedback", "{" +
+        "\"submissionid\": \""+ submissionDataRecord.submissionid +"\"," +
+        "\"grade\": \"" + $("#grade").val() + "\"," +
+        "\"feedback\": \"" + $("#finaltext").val() + "\"," +
+        "\"wstoken\": \""+wstoken+"\"" +
+        "}");
+}
 
-    $.ajax(settings).done(function (response) {
-        console.log(response);
-    });
+function giveFeedbackCallback(data, status){
+    let d = JSON.parse(data);
+    if (d.response){
+        alert("Successfully saved to Moodle");
+    }
+    else{
+        alert("Error while saving to Moodle:\n" + data);
+    }
 }

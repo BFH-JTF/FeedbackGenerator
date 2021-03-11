@@ -88,6 +88,7 @@ foreach ($r as $cat){
                             <span class="input-group-text" id="catName1">Textblock Text</span>
                         </div>
                         <textarea id="TextBlockModalText" class="form-control" rows="5" style="min-width: 100%"></textarea>
+                        <small>Use <i>[FIRSTNAME]</i> or <i>[LASTNAME]</i> as variables</small>
                     </div>
                     <input type="hidden" id="TextBlockModalID">
                 </div>
