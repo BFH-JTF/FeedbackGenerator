@@ -58,7 +58,7 @@ function addBlock(){
         title: document.getElementById("TextBlockModalTitle").value,
         performance: document.getElementById("TextBlockModalPerformanceSlider").value,
         category: document.getElementById("TextBlockModalCategorySelect").value,
-        textBlock: document.getElementById("TextBlockModalText").value,
+        textblock: document.getElementById("TextBlockModalText").value,
     }
     APIsend("addTextBlock", JSON.stringify(data));
 }
@@ -87,7 +87,8 @@ function fillTextBlockModal(e){
         document.getElementById("TextBlockModalHeading").innerText = "New Textblock"
         document.getElementById("TextBlockModalNewButton").innerText = "Create Textblock"
         document.getElementById("TextBlockModalTitle").value = "";
-        document.getElementById("TextBlockModalPerformanceSlider").value = 5;
+        document.getElementById("TextBlockModalPerformanceSlider").value = 3;
+        document.getElementById("modalPerformanceValue").value = 3;
         document.getElementById("TextBlockModalText").innerText = "";
         document.getElementById("TextBlockModalNewButton").setAttribute("onclick", "addBlock()");
     }
@@ -131,6 +132,25 @@ function addTextBlockTile(data) {
         "<small class=\"p-2\" style=\"background-color: " + data.color + "\" data-category=\"" + data.categoryID + "\" data-performance=\"" + data.performance + "\" data-id=\"" + id + "\">" + data.blockID + "</small>\n" +
         "</div>\n" +
         "</div>";
+
+    /*cardMain.innerHTML="<div class=\"card mt-3 mb-3\" style=\"width: 20em;\" data-type=\"categoryCard\" data-id=\"15\">\n" +
+        "<div class=\"card-header\">\n" +
+        "<div style=\"width: 24px;height: 24px;background-color:"+data.color+";float: left;margin-right: 8px;\"></div>\n" +
+        "<div>\n" +
+        "<h5>"+data.title+"</h5>\n" +
+        "</div>\n" +
+        "</div>\n" +
+        "<div class=\"card-body\">\n" +
+        "<p class=\"card-text\">"+data.textblock+"</p>\n" +
+        "<span class=\"badge badge-pill badge-info\">Performance: "+data.performance+"</span>\n" +
+        "</div>\n" +
+        "<div class=\"card-footer bg-transparent\">\n" +
+        "<div class=\"container-fluid d-flex justify-content-between\">\n" +
+        "<a href=\"#\" class=\"btn btn-outline-primary\" data-toggle=\"modal\" data-target=\"#TextBlockModal\" onclick=\"fillTextBlockModal(this)\">Open</a>\n" +
+        "<a href=\"#\" class=\"btn btn-outline-danger\" onclick=\"removeBlock(this)\">Remove</a>\n" +
+        "</div>\n" +
+        "</div>\n" +
+        "</div>";*/
     updateCards();
 }
 

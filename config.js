@@ -40,6 +40,17 @@ function APIsend(action, data){
         case "giveFeedback":
             callbackFunction = giveFeedbackCallback;
             break;
+
+        case "getLocal":
+            callbackFunction = getLocalCallback;
+            break;
+
+        case "generateOverview":
+            callbackFunction = generateOverviewCallback;
+            break;
+
+        default:
+            callbackFunction = undefined;
     }
     $.post("api.php", {action: action, data: data}, callbackFunction);
 }

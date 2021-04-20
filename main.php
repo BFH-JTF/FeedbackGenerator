@@ -27,9 +27,11 @@ $assignmentID = $_SESSION["assignmentID"];
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinysort/3.2.5/tinysort.js"></script>
     <script type="text/javascript" src="config.js"></script>
     <script type="text/javascript" src="main.js"></script>
-    <script type="text/javascript">const assignmentID = <?php echo $assignmentID;?></script>
+    <script type="text/javascript">// noinspection JSAnnotator
+        const assignmentID = <?php echo $assignmentID;?></script>
     <style type='text/css'>
         .btn-green {
             background-color: #1ab394;
@@ -55,19 +57,21 @@ $assignmentID = $_SESSION["assignmentID"];
 <body style="background-color: #fafafa;" onload="pageInit()">
 <?php include("navbar.html");?>
 <div id="loadSpinner" class="text-center container-fluid">
-    <div class="spinner-border" role="status">
-        Loading ...
-    </div>
+    <div class="spinner-border" role="status"></div>
 </div>
 <div class="row">
-    <div class="col-sm-2">
-        <h5 class="text-center">Assignment ID: <span id="assignmentID"></span> </h5>
-        <div class="list-group" id="submissionList"></div>
+    <div class="col-sm-2 text-center">
+        <h5 class="text-center" hidden>Assignment ID: <span id="assignmentID"></span> </h5>
+        <button class="btn btn-green btn-sm mb-2" data-toggle="modal" data-target="#SenderModal" onclick="generateOverview()">Send Feedbacks to Moodle</button><br>
+        <i title="Submissions without feedback" class="fas fa-circle mr-2" style="color: Tomato;"></i><span id="cNoFeedback" class="mr-2"></span>
+        <i title="Submissions with unsaved changes"class="far fa-circle mr-2" style="color: #4775ff;"></i><span id="cUnsavedFeedback" class="mr-2"></span>
+        <i title="Submissions with feedback" class="far fa-check-circle mr-2" style="color: Forestgreen"></i><span id="cMoodleMatch" class="mr-2"></span>
+        <div class="list-group text-left" id="submissionList"></div>
     </div>
     <div id="mainScreen" class="col-sm-6" hidden>
         <div class="container-fluid text-center mt-3 mb-3">
-            <p class="h2 d-block">Feedback Editor </p>
-            <u>Submission at <span id="submissionTimeString"></span> by <span id="studName"></span> (<span id="attachments"><i class="fas fa-envelope-open-text" data-toggle="tooltip" title="Open submission"></i></span>)</u>
+            <!-- <p class="h2 d-block">Feedback Editor </p>-->
+            <u>Submission at <span id="submissionTimeString"></span> by <span style="font-size: 1.5em" id="studName"></span> (<span id="attachments"><i class="fas fa-envelope-open-text" data-toggle="tooltip" title="Open submission"></i></span>)</u>
             <p>Filter by Category</p>
             <div class="container-fluid text-center mt-3 mb-3 d-flex justify-content-center">
                 <?php echo $buttonString;?>
@@ -78,7 +82,6 @@ $assignmentID = $_SESSION["assignmentID"];
             </div>
         </div>
         <hr>
-        <p class="text-lead text-center">Click on <span style="color: Tomato;"><i class="fas fa-trash-alt"></i></span> to remove text block from feedback text</p>
         <div class="container-fluid mt-5">
             <div class="list-group">
                 <ul id="activeFeedbackItems" class="sortable grid w-100">
@@ -99,16 +102,50 @@ $assignmentID = $_SESSION["assignmentID"];
             <p class="h3 d-block">Feedback Entry </p>
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
-                    <span class="input-group-text">Grade</span>
+                    <span class="input-group-text">Submission Status</span>
                 </div>
-                <input id="grade" type="text" class="form-control">
+                <input id="status" type="text" class="form-control" disabled>
             </div>
-            <textarea id="finaltext" class="form-control" rows="5">This is the current feedback text</textarea>
-            <button class="btn btn-success mt-3" onclick="saveMoodle()">Save to Moodle</button>
+            <h5>Local Text</h5>
+            <textarea id="finaltext" class="form-control mb-1" rows="5" onkeyup="saveLocal()"></textarea>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Local Grade&nbsp;<span class="gradescheme"></span></span>
+                </div>
+                <input id="grade" type="text" class="form-control" onkeyup="saveLocal()">
+            </div>
+            <h5>Moodle Feedback Text</h5>
+            <button class="btn btn-sm btn-info" onclick="copyMoodle2Local()">Copy to local feedback</button>
+            <textarea id="moodletext" class="form-control mb-1" rows="5" onkeyup="saveLocal()" disabled></textarea>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Moodle Grade&nbsp;<span class="gradescheme"></span></span>
+                </div>
+                <input id="moodle_grade" type="text" class="form-control" onkeyup="saveLocal()" disabled>
+            </div>
         </div>
     </div>
 </div>
 
+<div class="modal" id="SenderModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Send this Feedback to Moodle</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid justify-content-around flex-wrap" id="tableContainer"></div>
+            </div>
+            <div class="modal-footer">
+                <button id="SendToMoodleButton" type="button" class="btn btn-primary" data-dismiss="modal" onclick="save2Moodle()">Send to Moodle</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 <script type="text/javascript">document.getElementById("nav-home-tab").classList.add("active")</script>
 </html>

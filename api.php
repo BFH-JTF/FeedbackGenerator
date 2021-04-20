@@ -1,8 +1,10 @@
 <?php
+$baseURL = "https://moodle.bfh.ch/webservice/restful/server.php/";
+
 include_once "config.php";
 if (userAuthenticated() && isset($_POST["action"]) && isset($_POST["data"])){
     $db = connectDB();
-    $data = json_decode($_POST["data"]);
+    $data = json_decode(addcslashes($_POST["data"], "\n"));
     $userID = getActiveUserID($db);
 
     switch ($_POST["action"]){
@@ -70,7 +72,7 @@ if (userAuthenticated() && isset($_POST["action"]) && isset($_POST["data"])){
         case "getAssignmentData":
             $curl = curl_init();
             curl_setopt_array($curl, [
-                CURLOPT_URL => "https://moodle-test.bfh.ch/webservice/restful/server.php/local_feedback_list_submissions",
+                CURLOPT_URL => $baseURL."local_feedback_list_submissions",
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => "",
                 CURLOPT_MAXREDIRS => 10,
@@ -86,13 +88,28 @@ if (userAuthenticated() && isset($_POST["action"]) && isset($_POST["data"])){
                     "HTTP_CONTENT_TYPE: application/json"
                 ],
             ]);
-            echo curl_exec($curl);
+            $d = json_decode(curl_exec($curl));
+            foreach ($d->response->submissions as $sub)
+            {
+                $res = $db->query("SELECT grade, feedback from cache WHERE submissionid='".$sub->submissionid."'");
+                $r = $res->fetch_array(MYSQLI_ASSOC);
+                if ($r !== null){
+                    $sub->localGrade = $r["grade"];
+                    $sub->localFeedback = $r["feedback"];
+                }
+                else{
+                    $sub->localGrade = "";
+                    $sub->localFeedback = "";
+                }
+
+            }
+            echo json_encode($d);
             break;
 
         case "getSubmissionData":
             $curl = curl_init();
             curl_setopt_array($curl, [
-                CURLOPT_URL => "https://moodle-test.bfh.ch/webservice/restful/server.php/local_feedback_get_submission",
+                CURLOPT_URL => $baseURL."local_feedback_get_submission",
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => "",
                 CURLOPT_MAXREDIRS => 10,
@@ -114,7 +131,7 @@ if (userAuthenticated() && isset($_POST["action"]) && isset($_POST["data"])){
         case "giveFeedback":
             $curl = curl_init();
             curl_setopt_array($curl, [
-                CURLOPT_URL => "https://moodle-test.bfh.ch/webservice/restful/server.php/local_feedback_update_grade",
+                CURLOPT_URL => $baseURL."local_feedback_update_grade",
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => "",
                 CURLOPT_MAXREDIRS => 10,
@@ -128,10 +145,42 @@ if (userAuthenticated() && isset($_POST["action"]) && isset($_POST["data"])){
                     "HTTP_ACCEPT: application/json",
                     "HTTP_CONTENT_TYPE: application/json"
                 ],
-                CURLOPT_POSTFIELDS => "{\"request\": {\"submissionid\": ".$data->submissionid.", \"grade\": \"".$data->grade."\", \"feedback\": \"".$data->feedback."\"}} ",
+                CURLOPT_POSTFIELDS => "{\"request\": {\"submissionid\": ".$data->submissionid.", \"grade\": \"".$data->grade."\", \"feedback\": \"".$db->real_escape_string($data->feedback)."\"}} ",
 
             ]);
             echo curl_exec($curl);
+            break;
+
+        case "saveLocal":
+            if ($db->query("INSERT INTO cache (submissionid, grade, feedback) VALUES (\"".$db->real_escape_string($data->submissionid)."\", \"".$db->real_escape_string($data->grade)."\", \"".$db->real_escape_string($data->feedback)."\") ON DUPLICATE KEY UPDATE grade=\"".$db->real_escape_string($data->grade)."\", feedback=\"".$db->real_escape_string($data->feedback)."\"")){
+                echo "Data saved successfully";
+            }
+            else{
+                echo "Error while saving data to DB";
+            }
+            break;
+
+        case "getLocal":
+            $result = $db->query("SELECT grade, feedback FROM cache WHERE submissionid='".$db->real_escape_string($data->submissionid)."'");
+            if($result){
+                $r = $result->fetch_all(MYSQLI_ASSOC);
+                if (count($r) > 0) {
+                    echo json_encode($r);
+                }
+                else{
+                    echo "{\"error\": \"No data in DB\"}";
+                }
+            }
+            break;
+
+        case "generateOverview":
+            foreach ($data as $submission){
+                $result = $db->query("SELECT grade, feedback FROM cache WHERE submissionid='".$db->real_escape_string($submission->submissionid)."'");
+                $r = $result->fetch_assoc();
+                $submission->grade = $r["grade"];
+                $submission->feedback = $r["feedback"];
+            }
+            echo json_encode($data);
             break;
     }
 }
